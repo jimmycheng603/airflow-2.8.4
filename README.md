@@ -37,3 +37,37 @@ if arg_tags_filter:
 - ✅ DAG C: 显示（同时有 tag1 和 tag2）
 - ❌ DAG A: 不显示（只有 tag1，没有 tag2）
 - ❌ DAG B: 不显示（只有 tag2，没有 tag1）
+
+## 部署方式
+
+### 前置条件
+
+1. 确保已安装 Airflow 2.8.4
+2. 确认 conda 环境路径正确
+3. 确保有文件写入权限
+
+### 手动部署（推荐）
+
+1. **备份原文件**
+   ```bash
+   cp <环境名称>/lib/python3.10/site-packages/airflow/www/views.py \
+        <环境名称>/lib/python3.10/site-packages/airflow/www/views.py.backup.$(date +%Y%m%d_%H%M%S)
+   ```
+
+2. **复制修改后的文件**
+   ```bash
+   cp airflow/www/views.py \
+        <环境名称>/lib/python3.10/site-packages/airflow/www/views.py
+   ```
+
+3. **清理 Python 缓存**
+   ```bash
+   rm -f <环境名称>/lib/python3.10/site-packages/airflow/www/__pycache__/views.*.pyc
+   ```
+
+4. **重启 Airflow webserver**
+   ```bash
+   conda activate <环境名称>
+   airflow webserver --stop
+   airflow webserver --port <端口号>
+   ```
