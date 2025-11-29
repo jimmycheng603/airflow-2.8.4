@@ -774,7 +774,24 @@ class Airflow(AirflowBaseView):
             flask_session[FILTER_STATUS_COOKIE] = status
             arg_status_filter = status
 
-        dags_per_page = PAGE_SIZE
+        # Get page_size from URL parameter, default to 100 if not specified
+        arg_page_size = request.args.get("page_size", default=None, type=str)
+        if arg_page_size == "all":
+            dags_per_page = 999999  # Use a large number for "all"
+        elif arg_page_size:
+            try:
+                dags_per_page = int(arg_page_size)
+                # Validate page_size: only allow 100, 200, 500, or "all"
+                if dags_per_page not in [100, 200, 500]:
+                    dags_per_page = 100  # Default to 100 if invalid value
+            except ValueError:
+                dags_per_page = 100  # Default to 100 if invalid value
+        else:
+            # If PAGE_SIZE is one of the allowed values, use it; otherwise default to 100
+            if PAGE_SIZE in [100, 200, 500]:
+                dags_per_page = PAGE_SIZE
+            else:
+                dags_per_page = 100
 
         start = current_page * dags_per_page
         end = start + dags_per_page
@@ -1029,6 +1046,15 @@ class Airflow(AirflowBaseView):
                     "warning",
                 )
 
+        # Determine the page_size display value for the dropdown
+        if dags_per_page >= 999999:
+            page_size_display = "all"
+        elif dags_per_page in [100, 200, 500]:
+            page_size_display = str(dags_per_page)
+        else:
+            # Fallback to 100 if page_size is not one of the expected values
+            page_size_display = "100"
+
         return self.render_template(
             "airflow/dags.html",
             dags=dags,
@@ -1039,6 +1065,7 @@ class Airflow(AirflowBaseView):
             search_query=arg_search_query or "",
             page_title=Markup(page_title) if page_title_has_markup else page_title,
             page_size=dags_per_page,
+            page_size_display=page_size_display,
             num_of_pages=num_of_pages,
             num_dag_from=min(start + 1, num_of_all_dags),
             num_dag_to=min(end, num_of_all_dags),
@@ -1051,6 +1078,7 @@ class Airflow(AirflowBaseView):
                 tags=arg_tags_filter or None,
                 sorting_key=arg_sorting_key or None,
                 sorting_direction=arg_sorting_direction or None,
+                page_size=arg_page_size if arg_page_size else None,
             ),
             num_runs=num_runs,
             tags=tags,
