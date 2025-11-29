@@ -80,36 +80,7 @@ if arg_tags_filter:
 
 ## 部署方式
 
-### 方法 1：使用部署脚本（推荐）
-
-1. **运行部署脚本**
-
-   ```bash
-   cd /Users/chengjunjie/Documents/workspace_github/airflow-2.8.4
-   ./deploy.sh <环境名称>
-   ```
-
-   例如：
-
-   ```bash
-   ./deploy.sh yikescheduler
-   ```
-
-2. **脚本会自动完成**:
-
-   - 备份原文件（views.py, utils.py, dags.html）
-   - 复制修改后的文件
-   - 清理 Python 缓存
-
-3. **重启 Airflow webserver**
-
-   ```bash
-   conda activate <环境名称>
-   airflow webserver --stop
-   airflow webserver --port <端口号>
-   ```
-
-### 方法 2：手动部署
+### 手动部署
 
 ### 前置条件
 
