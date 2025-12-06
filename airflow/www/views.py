@@ -774,7 +774,7 @@ class Airflow(AirflowBaseView):
             flask_session[FILTER_STATUS_COOKIE] = status
             arg_status_filter = status
 
-        # Get page_size from URL parameter, default to 100 if not specified
+        # Get page_size from URL parameter, default to 200 if not specified
         arg_page_size = request.args.get("page_size", default=None, type=str)
         if arg_page_size == "all":
             dags_per_page = 999999  # Use a large number for "all"
@@ -783,15 +783,12 @@ class Airflow(AirflowBaseView):
                 dags_per_page = int(arg_page_size)
                 # Validate page_size: only allow 100, 200, 500, or "all"
                 if dags_per_page not in [100, 200, 500]:
-                    dags_per_page = 100  # Default to 100 if invalid value
+                    dags_per_page = 200  # Default to 200 if invalid value
             except ValueError:
-                dags_per_page = 100  # Default to 100 if invalid value
+                dags_per_page = 200  # Default to 200 if invalid value
         else:
-            # If PAGE_SIZE is one of the allowed values, use it; otherwise default to 100
-            if PAGE_SIZE in [100, 200, 500]:
-                dags_per_page = PAGE_SIZE
-            else:
-                dags_per_page = 100
+            # Default to 200 for DAGs list (not using PAGE_SIZE from config)
+            dags_per_page = 200
 
         start = current_page * dags_per_page
         end = start + dags_per_page
@@ -1052,8 +1049,8 @@ class Airflow(AirflowBaseView):
         elif dags_per_page in [100, 200, 500]:
             page_size_display = str(dags_per_page)
         else:
-            # Fallback to 100 if page_size is not one of the expected values
-            page_size_display = "100"
+            # Fallback to 200 if page_size is not one of the expected values
+            page_size_display = "200"
 
         return self.render_template(
             "airflow/dags.html",
